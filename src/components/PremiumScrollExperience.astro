@@ -69,9 +69,9 @@ const storyBlocks = [
         <Image
           src={productImage}
           alt="Limoncello bottle on a coastal terrace in Kaş"
-          width={1440}
-          height={768}
-          sizes="(min-width: 900px) 44vw, 88vw"
+          width={900}
+          height={1125}
+          sizes="(min-width: 900px) 34rem, 88vw"
           class="premium-scroll__product-image"
         />
         <figcaption>Signature limoncello, hand-finished in Antalya.</figcaption>
@@ -112,68 +112,96 @@ const storyBlocks = [
 
   if (root) {
     gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({
+      ignoreMobileResize: true,
+    });
 
     const motion = {
-      heroDistance: 170,
-      scrub: 0.9,
-      storyScrub: 0.7,
-      parallaxStrength: 1,
+      heroDistance: 1.28,
+      scrub: 0.38,
+      parallaxStrength: 0.72,
     };
 
     const q = gsap.utils.selector(root);
     const media = gsap.matchMedia();
 
-    media.add("(prefers-reduced-motion: no-preference)", () => {
+    media.add(
+      {
+        motion: "(prefers-reduced-motion: no-preference)",
+        desktop: "(min-width: 760px)",
+      },
+      (context) => {
+      const { desktop, motion: allowMotion } = context.conditions;
+      if (!allowMotion) return;
+
       const pin = q("[data-premium-pin]")[0];
+      const storyIntro = q(".premium-story__intro")[0];
+      const storyGrid = q("[data-story-grid]")[0];
+
+      gsap.set(
+        q(
+          "[data-coast], [data-sun], [data-mountains], [data-sea], [data-foreground], [data-glassline], [data-product]",
+        ),
+        {
+          force3D: true,
+          transformOrigin: "center center",
+        },
+      );
+
+      gsap.set(q("[data-product]"), {
+        autoAlpha: 0,
+        yPercent: 10,
+        scale: 0.94,
+      });
 
       const hero = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: root,
           start: "top top",
-          end: `+=${motion.heroDistance}%`,
+          end: () => `+=${Math.round(window.innerHeight * motion.heroDistance)}`,
           scrub: motion.scrub,
-          pin,
+          pin: desktop ? pin : false,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          fastScrollEnd: true,
         },
       });
 
       hero
         .fromTo(
           q("[data-coast]"),
-          { scale: 1.1, yPercent: 0 },
-          { scale: 1.02, yPercent: -8 * motion.parallaxStrength, duration: 1 },
+          { scale: 1.055, yPercent: 0 },
+          { scale: 1.015, yPercent: -4 * motion.parallaxStrength, duration: 1 },
           0,
         )
         .fromTo(
           q("[data-mountains]"),
-          { yPercent: 12, opacity: 0.35 },
-          { yPercent: -10 * motion.parallaxStrength, opacity: 0.62, duration: 1 },
+          { yPercent: 3, opacity: 0.32 },
+          { yPercent: -3 * motion.parallaxStrength, opacity: 0.48, duration: 1 },
           0,
         )
         .fromTo(
           q("[data-sea]"),
-          { yPercent: 14, opacity: 0.72 },
-          { yPercent: -5 * motion.parallaxStrength, opacity: 0.9, duration: 1 },
+          { yPercent: 4, opacity: 0.58 },
+          { yPercent: -2 * motion.parallaxStrength, opacity: 0.78, duration: 1 },
           0,
         )
         .fromTo(
           q("[data-sun]"),
-          { yPercent: 18, scale: 0.92, opacity: 0.5 },
-          { yPercent: -24 * motion.parallaxStrength, scale: 1.08, opacity: 0.86, duration: 1 },
+          { yPercent: 8, scale: 0.96, opacity: 0.46 },
+          { yPercent: -7 * motion.parallaxStrength, scale: 1.03, opacity: 0.7, duration: 1 },
           0,
         )
-        .fromTo(
+        .to(
           q("[data-product]"),
-          { autoAlpha: 0, yPercent: 14, scale: 0.88, filter: "blur(8px)" },
-          { autoAlpha: 1, yPercent: -4, scale: 1, filter: "blur(0px)", duration: 0.42, ease: "power3.out" },
+          { autoAlpha: 1, yPercent: -2, scale: 1, duration: 0.32, ease: "power3.out" },
           0.08,
         )
         .to(
           q("[data-product]"),
-          { yPercent: -11 * motion.parallaxStrength, scale: 1.04, duration: 0.58 },
-          0.42,
+          { yPercent: -6 * motion.parallaxStrength, scale: 1.018, duration: 0.6 },
+          0.4,
         )
         .from(
           q("[data-intro]"),
@@ -190,36 +218,36 @@ const storyBlocks = [
           { autoAlpha: 0, y: 18, stagger: 0.06, duration: 0.24, ease: "power2.out" },
           0.34,
         )
-        .to(q("[data-foreground]"), { yPercent: -16, duration: 1 }, 0)
-        .to(q("[data-glassline]"), { xPercent: 80, autoAlpha: 0.45, duration: 1 }, 0);
+        .to(q("[data-foreground]"), { yPercent: -5, duration: 1 }, 0)
+        .to(q("[data-glassline]"), { xPercent: 34, autoAlpha: 0.3, duration: 1 }, 0);
 
       gsap.from(q("[data-story-kicker], [data-story-heading], [data-story-text]"), {
         scrollTrigger: {
-          trigger: q(".premium-story__intro")[0],
+          trigger: storyIntro,
           start: "top 76%",
-          end: "bottom 58%",
-          scrub: motion.storyScrub,
+          once: true,
         },
         autoAlpha: 0,
-        y: 36,
-        stagger: 0.12,
+        y: 26,
+        duration: 0.75,
+        stagger: 0.1,
         ease: "power3.out",
       });
 
       gsap.from(q("[data-story-block]"), {
         scrollTrigger: {
-          trigger: q("[data-story-grid]")[0],
+          trigger: storyGrid,
           start: "top 78%",
-          end: "bottom 62%",
-          scrub: motion.storyScrub,
+          once: true,
         },
         autoAlpha: 0,
-        y: 52,
-        filter: "blur(10px)",
-        stagger: 0.18,
+        y: 34,
+        duration: 0.72,
+        stagger: 0.12,
         ease: "power3.out",
       });
-    });
+      },
+    );
   }
 </script>
 
@@ -232,11 +260,34 @@ const storyBlocks = [
     --premium-cream: #fff8e8;
     --premium-white: #fffdf7;
     --premium-ink: #1f1a14;
-    --premium-speed-note: 170;
+    --premium-scroll-distance: 1.28;
     position: relative;
     background:
       linear-gradient(180deg, var(--premium-white) 0%, #fff3c9 42%, #fefcf8 100%);
     color: var(--premium-ink);
+    isolation: isolate;
+    overflow: clip;
+  }
+
+  .premium-scroll::before,
+  .premium-scroll::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    height: 8rem;
+    pointer-events: none;
+  }
+
+  .premium-scroll::before {
+    top: 0;
+    background: linear-gradient(180deg, rgba(253, 252, 248, 0.92), rgba(5, 42, 58, 0));
+  }
+
+  .premium-scroll::after {
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(253, 252, 248, 0), #fefcf8);
   }
 
   .premium-scroll__pin {
@@ -246,6 +297,8 @@ const storyBlocks = [
     display: grid;
     align-items: center;
     background: var(--premium-deep-sea);
+    contain: paint style;
+    transform: translateZ(0);
   }
 
   .premium-scroll__scene,
@@ -259,8 +312,8 @@ const storyBlocks = [
     z-index: 7;
     pointer-events: none;
     background:
-      linear-gradient(90deg, rgba(5, 42, 58, 0.82) 0%, rgba(5, 42, 58, 0.48) 35%, rgba(255, 248, 232, 0.08) 100%),
-      linear-gradient(180deg, rgba(255, 248, 232, 0.2) 0%, rgba(255, 248, 232, 0) 44%, rgba(5, 42, 58, 0.46) 100%);
+      linear-gradient(90deg, rgba(5, 42, 58, 0.8) 0%, rgba(5, 42, 58, 0.46) 36%, rgba(255, 248, 232, 0.1) 100%),
+      linear-gradient(180deg, rgba(255, 248, 232, 0.32) 0%, rgba(255, 248, 232, 0) 36%, rgba(5, 42, 58, 0.54) 100%);
   }
 
   .premium-scroll__coast {
@@ -270,8 +323,21 @@ const storyBlocks = [
     width: 110%;
     height: 110%;
     object-fit: cover;
-    filter: saturate(0.94) contrast(1.04);
     transform-origin: center center;
+  }
+
+  .premium-scroll__coast,
+  .premium-scroll__sun,
+  .premium-scroll__mountains,
+  .premium-scroll__sea,
+  .premium-scroll__foreground,
+  .premium-scroll__glassline,
+  .premium-scroll__product,
+  .premium-scroll [data-intro],
+  .premium-scroll [data-highlight] {
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+    will-change: transform, opacity;
   }
 
   .premium-scroll__sun {
@@ -283,7 +349,6 @@ const storyBlocks = [
     height: 22rem;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255, 230, 132, 0.72) 0%, rgba(255, 214, 83, 0.24) 38%, rgba(255, 214, 83, 0) 68%);
-    filter: blur(3px);
   }
 
   .premium-scroll__mountains {
@@ -297,7 +362,6 @@ const storyBlocks = [
       linear-gradient(180deg, rgba(5, 42, 58, 0.04), rgba(5, 42, 58, 0.78)),
       linear-gradient(90deg, rgba(5, 42, 58, 0.86), rgba(6, 63, 92, 0.52));
     clip-path: polygon(0 72%, 12% 44%, 25% 62%, 42% 30%, 57% 56%, 72% 26%, 88% 58%, 100% 36%, 100% 100%, 0 100%);
-    filter: blur(0.5px);
   }
 
   .premium-scroll__sea {
@@ -405,7 +469,7 @@ const storyBlocks = [
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 248, 232, 0.88);
     font-size: 0.78rem;
-    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
 
   .premium-scroll__product {
@@ -439,7 +503,7 @@ const storyBlocks = [
     height: 2.2rem;
     border-radius: 50%;
     background: rgba(255, 223, 112, 0.24);
-    filter: blur(18px);
+    opacity: 0.7;
   }
 
   .premium-scroll__product-image {
