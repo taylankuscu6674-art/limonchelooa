@@ -1,0 +1,611 @@
+---
+import { Image } from "astro:assets";
+import coastImage from "../assets/background2/hero.png";
+import productImage from "../assets/product/limoncello.jpeg";
+
+const storyBlocks = [
+  {
+    eyebrow: "01 / Lemons",
+    title: "Kaş citrus, selected for aroma",
+    text: "Bright peels are chosen for oil, color, and fragrance before a slow infusion begins.",
+  },
+  {
+    eyebrow: "02 / Craft",
+    title: "Small batches, finished by hand",
+    text: "Each bottle is balanced in measured runs, giving the liqueur a clean body and a precise finish.",
+  },
+  {
+    eyebrow: "03 / Serve",
+    title: "Ice-cold, coastal, refined",
+    text: "Serve after dinner or over a single cube when the evening turns warm and gold.",
+  },
+];
+---
+
+<section
+  id="premium-craft"
+  class="premium-scroll"
+  data-premium-scroll
+  aria-labelledby="premium-craft-heading"
+>
+  <div class="premium-scroll__pin" data-premium-pin>
+    <div class="premium-scroll__scene" aria-hidden="true">
+      <Image
+        src={coastImage}
+        alt=""
+        width={1024}
+        height={728}
+        sizes="100vw"
+        class="premium-scroll__coast"
+        data-coast
+      />
+      <div class="premium-scroll__sun" data-sun></div>
+      <div class="premium-scroll__mountains" data-mountains></div>
+      <div class="premium-scroll__sea" data-sea></div>
+      <div class="premium-scroll__foreground" data-foreground></div>
+      <div class="premium-scroll__glassline" data-glassline></div>
+    </div>
+
+    <div class="premium-scroll__content">
+      <div class="premium-scroll__copy">
+        <p class="premium-scroll__eyebrow" data-intro data-intro-soft>
+          Kaş / Antalya / Handmade Limoncello
+        </p>
+        <h2 id="premium-craft-heading" data-intro>
+          A coastal ritual, bottled in sunlight.
+        </h2>
+        <p class="premium-scroll__lead" data-intro data-intro-soft>
+          Mediterranean lemons, cool glass, and slow craft come together in a
+          limoncello made for long summer tables.
+        </p>
+        <ul class="premium-scroll__highlights" aria-label="Product highlights">
+          <li data-highlight>Handmade</li>
+          <li data-highlight>Premium ingredients</li>
+          <li data-highlight>Kaş citrus</li>
+        </ul>
+      </div>
+
+      <figure class="premium-scroll__product" data-product>
+        <Image
+          src={productImage}
+          alt="Limoncello bottle on a coastal terrace in Kaş"
+          width={1440}
+          height={768}
+          sizes="(min-width: 900px) 44vw, 88vw"
+          class="premium-scroll__product-image"
+        />
+        <figcaption>Signature limoncello, hand-finished in Antalya.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <div class="premium-story">
+    <div class="premium-story__intro">
+      <p data-story-kicker>Craft Notes</p>
+      <h3 data-story-heading>Designed to unfold slowly.</h3>
+      <p data-story-text>
+        The section continues with a measured story rhythm: no loud tricks, just
+        warm light, deep sea tones, and refined motion that reveals the bottle’s
+        character piece by piece.
+      </p>
+    </div>
+
+    <div class="premium-story__grid" data-story-grid>
+      {
+        storyBlocks.map((block) => (
+          <article class="premium-story__block" data-story-block>
+            <p>{block.eyebrow}</p>
+            <h4>{block.title}</h4>
+            <span>{block.text}</span>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  const root = document.querySelector("[data-premium-scroll]");
+
+  if (root) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const motion = {
+      heroDistance: 170,
+      scrub: 0.9,
+      storyScrub: 0.7,
+      parallaxStrength: 1,
+    };
+
+    const q = gsap.utils.selector(root);
+    const media = gsap.matchMedia();
+
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const pin = q("[data-premium-pin]")[0];
+
+      const hero = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: `+=${motion.heroDistance}%`,
+          scrub: motion.scrub,
+          pin,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      hero
+        .fromTo(
+          q("[data-coast]"),
+          { scale: 1.1, yPercent: 0 },
+          { scale: 1.02, yPercent: -8 * motion.parallaxStrength, duration: 1 },
+          0,
+        )
+        .fromTo(
+          q("[data-mountains]"),
+          { yPercent: 12, opacity: 0.35 },
+          { yPercent: -10 * motion.parallaxStrength, opacity: 0.62, duration: 1 },
+          0,
+        )
+        .fromTo(
+          q("[data-sea]"),
+          { yPercent: 14, opacity: 0.72 },
+          { yPercent: -5 * motion.parallaxStrength, opacity: 0.9, duration: 1 },
+          0,
+        )
+        .fromTo(
+          q("[data-sun]"),
+          { yPercent: 18, scale: 0.92, opacity: 0.5 },
+          { yPercent: -24 * motion.parallaxStrength, scale: 1.08, opacity: 0.86, duration: 1 },
+          0,
+        )
+        .fromTo(
+          q("[data-product]"),
+          { autoAlpha: 0, yPercent: 14, scale: 0.88, filter: "blur(8px)" },
+          { autoAlpha: 1, yPercent: -4, scale: 1, filter: "blur(0px)", duration: 0.42, ease: "power3.out" },
+          0.08,
+        )
+        .to(
+          q("[data-product]"),
+          { yPercent: -11 * motion.parallaxStrength, scale: 1.04, duration: 0.58 },
+          0.42,
+        )
+        .from(
+          q("[data-intro]"),
+          { autoAlpha: 0, y: 34, stagger: 0.08, duration: 0.34, ease: "power3.out" },
+          0.12,
+        )
+        .to(
+          q("[data-intro-soft]"),
+          { autoAlpha: 0.68, y: -22, duration: 0.46 },
+          0.52,
+        )
+        .from(
+          q("[data-highlight]"),
+          { autoAlpha: 0, y: 18, stagger: 0.06, duration: 0.24, ease: "power2.out" },
+          0.34,
+        )
+        .to(q("[data-foreground]"), { yPercent: -16, duration: 1 }, 0)
+        .to(q("[data-glassline]"), { xPercent: 80, autoAlpha: 0.45, duration: 1 }, 0);
+
+      gsap.from(q("[data-story-kicker], [data-story-heading], [data-story-text]"), {
+        scrollTrigger: {
+          trigger: q(".premium-story__intro")[0],
+          start: "top 76%",
+          end: "bottom 58%",
+          scrub: motion.storyScrub,
+        },
+        autoAlpha: 0,
+        y: 36,
+        stagger: 0.12,
+        ease: "power3.out",
+      });
+
+      gsap.from(q("[data-story-block]"), {
+        scrollTrigger: {
+          trigger: q("[data-story-grid]")[0],
+          start: "top 78%",
+          end: "bottom 62%",
+          scrub: motion.storyScrub,
+        },
+        autoAlpha: 0,
+        y: 52,
+        filter: "blur(10px)",
+        stagger: 0.18,
+        ease: "power3.out",
+      });
+    });
+  }
+</script>
+
+<style>
+  .premium-scroll {
+    --premium-sea: #063f5c;
+    --premium-deep-sea: #052a3a;
+    --premium-lemon: #f6d642;
+    --premium-gold: #c8a45d;
+    --premium-cream: #fff8e8;
+    --premium-white: #fffdf7;
+    --premium-ink: #1f1a14;
+    --premium-speed-note: 170;
+    position: relative;
+    background:
+      linear-gradient(180deg, var(--premium-white) 0%, #fff3c9 42%, #fefcf8 100%);
+    color: var(--premium-ink);
+  }
+
+  .premium-scroll__pin {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    display: grid;
+    align-items: center;
+    background: var(--premium-deep-sea);
+  }
+
+  .premium-scroll__scene,
+  .premium-scroll__scene::after {
+    position: absolute;
+    inset: 0;
+  }
+
+  .premium-scroll__scene::after {
+    content: "";
+    z-index: 7;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(5, 42, 58, 0.82) 0%, rgba(5, 42, 58, 0.48) 35%, rgba(255, 248, 232, 0.08) 100%),
+      linear-gradient(180deg, rgba(255, 248, 232, 0.2) 0%, rgba(255, 248, 232, 0) 44%, rgba(5, 42, 58, 0.46) 100%);
+  }
+
+  .premium-scroll__coast {
+    position: absolute;
+    inset: -5%;
+    z-index: 1;
+    width: 110%;
+    height: 110%;
+    object-fit: cover;
+    filter: saturate(0.94) contrast(1.04);
+    transform-origin: center center;
+  }
+
+  .premium-scroll__sun {
+    position: absolute;
+    z-index: 2;
+    top: 10%;
+    right: 12%;
+    width: 22rem;
+    height: 22rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 230, 132, 0.72) 0%, rgba(255, 214, 83, 0.24) 38%, rgba(255, 214, 83, 0) 68%);
+    filter: blur(3px);
+  }
+
+  .premium-scroll__mountains {
+    position: absolute;
+    z-index: 3;
+    left: -8%;
+    right: -8%;
+    bottom: 26%;
+    height: 26%;
+    background:
+      linear-gradient(180deg, rgba(5, 42, 58, 0.04), rgba(5, 42, 58, 0.78)),
+      linear-gradient(90deg, rgba(5, 42, 58, 0.86), rgba(6, 63, 92, 0.52));
+    clip-path: polygon(0 72%, 12% 44%, 25% 62%, 42% 30%, 57% 56%, 72% 26%, 88% 58%, 100% 36%, 100% 100%, 0 100%);
+    filter: blur(0.5px);
+  }
+
+  .premium-scroll__sea {
+    position: absolute;
+    z-index: 4;
+    left: -10%;
+    right: -10%;
+    bottom: -8%;
+    height: 48%;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 248, 232, 0.18) 36%, rgba(5, 42, 58, 0.7) 100%),
+      repeating-linear-gradient(178deg, rgba(255, 255, 255, 0.2) 0 1px, rgba(255, 255, 255, 0) 1px 34px),
+      linear-gradient(90deg, #0e6f8f, var(--premium-sea));
+    transform: skewY(-2deg);
+  }
+
+  .premium-scroll__foreground {
+    position: absolute;
+    z-index: 5;
+    left: -6%;
+    right: -6%;
+    bottom: -17%;
+    height: 34%;
+    background:
+      linear-gradient(180deg, rgba(255, 248, 232, 0), rgba(255, 248, 232, 0.92) 72%),
+      linear-gradient(90deg, rgba(200, 164, 93, 0.34), rgba(255, 248, 232, 0.74), rgba(6, 63, 92, 0.18));
+    transform: skewY(-3deg);
+  }
+
+  .premium-scroll__glassline {
+    position: absolute;
+    z-index: 8;
+    top: 12%;
+    left: -28%;
+    width: 56%;
+    height: 150%;
+    background: linear-gradient(100deg, transparent 18%, rgba(255, 255, 255, 0.28) 46%, rgba(255, 255, 255, 0.04) 60%, transparent 76%);
+    transform: rotate(10deg);
+    opacity: 0.16;
+    pointer-events: none;
+  }
+
+  .premium-scroll__content {
+    position: relative;
+    z-index: 10;
+    width: min(72rem, calc(100% - 2rem));
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 0.96fr 1.04fr;
+    gap: 4rem;
+    align-items: center;
+    padding: 6rem 0;
+  }
+
+  .premium-scroll__copy {
+    max-width: 36rem;
+    color: var(--premium-white);
+  }
+
+  .premium-scroll__eyebrow {
+    margin: 0 0 1rem;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    color: rgba(255, 248, 232, 0.74);
+  }
+
+  .premium-scroll h2 {
+    margin: 0;
+    max-width: 12ch;
+    font-size: 4.25rem;
+    line-height: 0.95;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--premium-white);
+    text-wrap: balance;
+  }
+
+  .premium-scroll__lead {
+    margin: 1.6rem 0 0;
+    max-width: 33rem;
+    font-size: 1.08rem;
+    line-height: 1.9;
+    font-weight: 300;
+    color: rgba(255, 248, 232, 0.82);
+  }
+
+  .premium-scroll__highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .premium-scroll__highlights li {
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(255, 248, 232, 0.26);
+    border-radius: 8px;
+    padding: 0.45rem 0.78rem;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 248, 232, 0.88);
+    font-size: 0.78rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .premium-scroll__product {
+    position: relative;
+    justify-self: end;
+    width: min(100%, 34rem);
+    margin: 0;
+  }
+
+  .premium-scroll__product::before,
+  .premium-scroll__product::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .premium-scroll__product::before {
+    inset: -1px;
+    z-index: 2;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 248, 232, 0.34);
+    box-shadow:
+      0 2rem 5rem rgba(5, 42, 58, 0.34),
+      0 0 0 1px rgba(200, 164, 93, 0.14);
+  }
+
+  .premium-scroll__product::after {
+    left: 10%;
+    right: 10%;
+    bottom: -1.4rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    background: rgba(255, 223, 112, 0.24);
+    filter: blur(18px);
+  }
+
+  .premium-scroll__product-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    object-position: 66% 50%;
+    box-shadow: 0 1.5rem 4.5rem rgba(2, 22, 30, 0.36);
+  }
+
+  .premium-scroll__product figcaption {
+    margin-top: 1rem;
+    color: rgba(255, 248, 232, 0.66);
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+
+  .premium-story {
+    width: min(72rem, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 8rem 0 9rem;
+  }
+
+  .premium-story__intro {
+    max-width: 44rem;
+  }
+
+  .premium-story__intro p:first-child,
+  .premium-story__block p {
+    margin: 0 0 0.85rem;
+    color: var(--premium-gold);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .premium-story__intro h3 {
+    margin: 0;
+    color: var(--premium-ink);
+    font-size: 3.2rem;
+    line-height: 1.05;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .premium-story__intro p:last-child {
+    margin: 1.35rem 0 0;
+    max-width: 40rem;
+    color: #5c564e;
+    font-size: 1.02rem;
+    line-height: 1.9;
+    font-weight: 300;
+  }
+
+  .premium-story__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 4rem;
+  }
+
+  .premium-story__block {
+    min-height: 18rem;
+    border-radius: 8px;
+    border: 1px solid rgba(200, 164, 93, 0.22);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 248, 232, 0.62)),
+      linear-gradient(135deg, rgba(246, 214, 66, 0.08), rgba(6, 63, 92, 0.06));
+    padding: 1.4rem;
+    box-shadow: 0 1.25rem 3rem rgba(31, 26, 20, 0.07);
+  }
+
+  .premium-story__block h4 {
+    margin: 0;
+    color: var(--premium-ink);
+    font-size: 1.35rem;
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .premium-story__block span {
+    display: block;
+    margin-top: 1.1rem;
+    color: #665f55;
+    font-size: 0.96rem;
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  @media (max-width: 900px) {
+    .premium-scroll__content {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      padding: 5rem 0;
+    }
+
+    .premium-scroll h2 {
+      max-width: 11ch;
+      font-size: 3.2rem;
+    }
+
+    .premium-scroll__product {
+      justify-self: start;
+      width: min(100%, 28rem);
+    }
+
+    .premium-story__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .premium-scroll__pin {
+      min-height: 108svh;
+    }
+
+    .premium-scroll__content {
+      width: min(100% - 1.25rem, 72rem);
+      padding: 4.5rem 0 3.5rem;
+    }
+
+    .premium-scroll h2 {
+      font-size: 2.45rem;
+      line-height: 1;
+    }
+
+    .premium-scroll__lead {
+      font-size: 0.98rem;
+      line-height: 1.75;
+    }
+
+    .premium-scroll__product {
+      width: min(100%, 22rem);
+    }
+
+    .premium-scroll__product figcaption {
+      color: rgba(255, 248, 232, 0.76);
+    }
+
+    .premium-story {
+      width: min(100% - 1.25rem, 72rem);
+      padding: 5rem 0 6rem;
+    }
+
+    .premium-story__intro h3 {
+      font-size: 2.2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .premium-scroll__coast,
+    .premium-scroll__sun,
+    .premium-scroll__mountains,
+    .premium-scroll__sea,
+    .premium-scroll__foreground,
+    .premium-scroll__glassline,
+    .premium-scroll__product,
+    .premium-story__block {
+      transform: none !important;
+      filter: none !important;
+    }
+  }
+</style>
