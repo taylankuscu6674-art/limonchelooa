@@ -148,6 +148,9 @@
     : [];
   const light = overlay?.querySelector("[data-scene-light]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const entranceTravel = 26 + sceneConfig.depth * 12;
+  const handoffTravel = -12 - sceneConfig.depth * 10;
+  const lightTravel = 14 + sceneConfig.depth * 8;
 
   if (overlay && layers.length && !reducedMotion.matches) {
     const sections = sceneOrder
@@ -270,11 +273,11 @@
         section,
         {
           "--scene-progress": 0,
-          "--scene-light-shift": "-18%",
+          "--scene-light-shift": `${-lightTravel}%`,
         },
         {
           "--scene-progress": 1,
-          "--scene-light-shift": "18%",
+          "--scene-light-shift": `${lightTravel}%`,
           ease: "none",
           scrollTrigger: {
             trigger: section,
@@ -291,7 +294,7 @@
       if (content.length) {
         gsap.from(content, {
           autoAlpha: 0,
-          y: 34,
+          y: entranceTravel,
           scale: 0.985,
           filter: `blur(${sceneConfig.blur}px)`,
           clearProps: "filter",
@@ -308,7 +311,7 @@
         const handoffTargets = sceneHandoffTargets(section);
 
         gsap.to(handoffTargets, {
-          y: -18,
+          y: handoffTravel,
           autoAlpha: 0.88,
           scale: 0.995,
           ease: "none",
@@ -389,9 +392,11 @@
 
   .cinematic-scene::before {
     opacity: calc(var(--scene-overlay) * 0.5);
+    transform: scale(calc(1 + (var(--scene-progress) * var(--scene-depth) * 0.012)));
     background:
       radial-gradient(circle at 75% 18%, var(--scene-glow), transparent 34%),
       linear-gradient(180deg, var(--scene-top), transparent 46%, var(--scene-bottom));
+    will-change: transform, opacity;
   }
 
   .cinematic-scene::after {
