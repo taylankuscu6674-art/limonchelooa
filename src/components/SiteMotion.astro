@@ -10,6 +10,10 @@
   }
 
   .motion-section {
+    --motion-enter-y: 0px;
+    --motion-drift-y: 0px;
+    --motion-scene-opacity: 1;
+    --motion-scene-scale: 1;
     position: relative;
     isolation: isolate;
     overflow: clip;
@@ -61,6 +65,14 @@
     z-index: 2;
   }
 
+  .motion-ready .motion-section > :not([data-scene-background]) {
+    opacity: var(--motion-scene-opacity);
+    transform: translate3d(0, calc(var(--motion-enter-y) + var(--motion-drift-y)), 0)
+      scale(var(--motion-scene-scale));
+    transform-origin: center top;
+    will-change: transform, opacity;
+  }
+
   [data-motion-reveal] {
     backface-visibility: hidden;
   }
@@ -92,6 +104,10 @@
       linear-gradient(135deg, rgba(255, 248, 232, 0.26), transparent 42%),
       linear-gradient(180deg, transparent, rgba(201, 169, 98, 0.08));
     transition: opacity var(--motion-hover-duration) var(--motion-ease);
+  }
+
+  .motion-card :is(svg, img) {
+    transition: transform 780ms var(--motion-ease);
   }
 
   .motion-cta {
@@ -129,6 +145,10 @@
 
     .motion-card:hover::after {
       opacity: 1;
+    }
+
+    .motion-card:hover :is(svg, img) {
+      transform: translate3d(0, -2px, 0) scale(1.025);
     }
 
     .motion-cta:hover {
@@ -217,9 +237,11 @@
     [data-motion-reveal],
     .motion-card,
     .motion-cta,
-    .motion-image {
+    .motion-image,
+    .motion-section > :not([data-scene-background]) {
       transform: none !important;
       transition: none !important;
+      opacity: 1 !important;
     }
   }
 </style>

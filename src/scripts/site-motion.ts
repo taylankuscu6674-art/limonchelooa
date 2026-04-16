@@ -6,6 +6,8 @@ type SectionProfile = {
   light: string;
   strength: number;
   sweep: number;
+  depth: number;
+  imageDrift: number;
 };
 
 gsap.registerPlugin(ScrollTrigger);
@@ -25,60 +27,88 @@ const sectionProfiles: Record<string, SectionProfile> = {
     light: "72% 18%",
     strength: 0.18,
     sweep: 0.16,
+    depth: 8,
+    imageDrift: 2,
   },
   story: {
     glow: "rgba(201, 169, 98, 0.16)",
     light: "50% 8%",
     strength: 0.14,
     sweep: 0.1,
+    depth: 10,
+    imageDrift: 3,
   },
   highlights: {
     glow: "rgba(246, 214, 66, 0.2)",
     light: "20% 12%",
     strength: 0.16,
     sweep: 0.12,
+    depth: 12,
+    imageDrift: 4,
   },
   ingredients: {
     glow: "rgba(6, 63, 92, 0.1)",
     light: "82% 18%",
     strength: 0.12,
     sweep: 0.08,
+    depth: 10,
+    imageDrift: 3,
   },
   customize: {
     glow: "rgba(201, 169, 98, 0.14)",
     light: "50% 10%",
     strength: 0.12,
     sweep: 0.08,
+    depth: 9,
+    imageDrift: 3,
   },
   showcase: {
     glow: "rgba(246, 214, 66, 0.16)",
     light: "66% 16%",
     strength: 0.14,
     sweep: 0.1,
+    depth: 12,
+    imageDrift: 5,
   },
   experience: {
     glow: "rgba(255, 248, 232, 0.22)",
     light: "44% 10%",
     strength: 0.1,
     sweep: 0.07,
+    depth: 8,
+    imageDrift: 3,
   },
   testimonials: {
     glow: "rgba(201, 169, 98, 0.12)",
     light: "78% 16%",
     strength: 0.1,
     sweep: 0.07,
+    depth: 8,
+    imageDrift: 2,
   },
   urgency: {
     glow: "rgba(246, 214, 66, 0.18)",
     light: "62% 12%",
     strength: 0.16,
     sweep: 0.1,
+    depth: 10,
+    imageDrift: 3,
   },
   order: {
     glow: "rgba(246, 214, 66, 0.14)",
     light: "50% 12%",
     strength: 0.12,
     sweep: 0.08,
+    depth: 8,
+    imageDrift: 2,
+  },
+  "footer-contact": {
+    glow: "rgba(201, 169, 98, 0.1)",
+    light: "50% 0%",
+    strength: 0.08,
+    sweep: 0.06,
+    depth: 6,
+    imageDrift: 2,
   },
 };
 
@@ -113,7 +143,7 @@ function initSiteMotion() {
     ignoreMobileResize: true,
   });
 
-  const sections = Array.from(document.querySelectorAll<HTMLElement>("main > section"));
+  const sections = Array.from(document.querySelectorAll<HTMLElement>("main > section, body > footer"));
   const revealItems: HTMLElement[] = [];
 
   sections.forEach((section) => {
@@ -129,6 +159,10 @@ function initSiteMotion() {
     section.style.setProperty("--motion-strength", String(profile.strength));
     section.style.setProperty("--motion-sweep", String(profile.sweep));
     section.style.setProperty("--motion-progress", "0");
+    section.style.setProperty("--motion-enter-y", `${profile.depth}px`);
+    section.style.setProperty("--motion-drift-y", "0px");
+    section.style.setProperty("--motion-scene-opacity", "0.94");
+    section.style.setProperty("--motion-scene-scale", "0.992");
 
     ScrollTrigger.create({
       trigger: section,
@@ -150,11 +184,43 @@ function initSiteMotion() {
       },
     });
 
+    gsap.to(section, {
+      "--motion-enter-y": "0px",
+      "--motion-scene-opacity": 1,
+      "--motion-scene-scale": 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top 92%",
+        end: "top 38%",
+        scrub: motion.scrub,
+        invalidateOnRefresh: true,
+        fastScrollEnd: true,
+      },
+    });
+
+    gsap.fromTo(
+      section,
+      { "--motion-drift-y": `${profile.depth * 0.45}px` },
+      {
+        "--motion-drift-y": `${profile.depth * -0.45}px`,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: motion.ambientScrub,
+          invalidateOnRefresh: true,
+          fastScrollEnd: true,
+        },
+      },
+    );
+
     if (managed) return;
 
     const candidates = Array.from(
-      section.querySelectorAll<HTMLElement>("h1, h2, h3, p, article, blockquote, figure, form, li"),
-    );
+        section.querySelectorAll<HTMLElement>("h1, h2, h3, p, article, blockquote, figure, form, li"),
+      );
 
     candidates
       .filter((item) => shouldReveal(item, candidates))
@@ -173,9 +239,27 @@ function initSiteMotion() {
     .querySelectorAll("main a[href^='#'], main button[type='submit']")
     .forEach((item) => item.classList.add("motion-cta"));
 
-  document.querySelectorAll("main img").forEach((item) => {
+  document.querySelectorAll<HTMLElement>("main img").forEach((item) => {
     if (item.closest("[data-scene-background], .premium-scroll__scene")) return;
     item.classList.add("motion-image");
+
+    const section = item.closest<HTMLElement>("main > section");
+    if (!section || section.hasAttribute("data-motion-managed")) return;
+
+    const profile = profileFor(section);
+    gsap.to(item, {
+      yPercent: profile.imageDrift * -1,
+      scale: 1.012,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: motion.ambientScrub,
+        invalidateOnRefresh: true,
+        fastScrollEnd: true,
+      },
+    });
   });
 
   const heroBackground = document.querySelector("#hero [data-scene-background]");
