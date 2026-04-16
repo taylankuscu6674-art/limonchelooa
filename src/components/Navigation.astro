@@ -12,7 +12,9 @@ const links = [
 ---
 
 <header
-  class="sticky top-0 z-50 border-b border-lemon-300/50 bg-gradient-to-b from-lemon-100/95 to-lemon-200/90 backdrop-blur-md transition-shadow duration-300 hover:shadow-soft"
+  class="site-header sticky top-0 z-50 border-b backdrop-blur-md"
+  data-site-header
+  data-over-visual="false"
 >
   <nav
     class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4"
@@ -45,3 +47,122 @@ const links = [
     </ul>
   </nav>
 </header>
+
+<script is:inline>
+  (function () {
+    function initHeaderTone() {
+      var header = document.querySelector("[data-site-header]");
+      var visualSections = [
+        document.getElementById("hero"),
+        document.getElementById("premium-craft"),
+      ].filter(Boolean);
+
+      if (!header || !visualSections.length) return;
+
+      var ticking = false;
+
+      function updateHeaderTone() {
+        var probeY = header.offsetHeight + 2;
+        var overVisual = visualSections.some(function (section) {
+          var rect = section.getBoundingClientRect();
+          return rect.top <= probeY && rect.bottom >= probeY;
+        });
+
+        header.dataset.overVisual = overVisual ? "true" : "false";
+        ticking = false;
+      }
+
+      function requestUpdate() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(updateHeaderTone);
+      }
+
+      updateHeaderTone();
+      window.addEventListener("scroll", requestUpdate, { passive: true });
+      window.addEventListener("resize", requestUpdate, { passive: true });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initHeaderTone, { once: true });
+    } else {
+      initHeaderTone();
+    }
+  })();
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    color: #1c1917;
+    border-color: rgba(253, 224, 71, 0.5);
+    isolation: isolate;
+    transition:
+      color 900ms ease,
+      border-color 900ms ease,
+      box-shadow 900ms ease;
+  }
+
+  .site-header::before,
+  .site-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity 900ms ease;
+  }
+
+  .site-header::before {
+    background: linear-gradient(
+      180deg,
+      rgba(254, 249, 195, 0.95),
+      rgba(254, 240, 138, 0.9)
+    );
+    opacity: 1;
+  }
+
+  .site-header::after {
+    background:
+      linear-gradient(180deg, rgba(5, 42, 58, 0.58), rgba(6, 63, 92, 0.34)),
+      linear-gradient(90deg, rgba(255, 248, 232, 0.12), rgba(255, 248, 232, 0.03));
+    opacity: 0;
+  }
+
+  .site-header[data-over-visual="true"] {
+    color: rgba(255, 253, 247, 0.92);
+    border-color: rgba(255, 248, 232, 0.18);
+    box-shadow: 0 1rem 2.5rem rgba(5, 42, 58, 0.18);
+  }
+
+  .site-header[data-over-visual="true"]::before {
+    opacity: 0;
+  }
+
+  .site-header[data-over-visual="true"]::after {
+    opacity: 1;
+  }
+
+  .site-header a,
+  .site-header ul {
+    color: inherit;
+    transition:
+      color 900ms ease,
+      background-color 300ms ease,
+      border-color 900ms ease;
+  }
+
+  .site-header[data-over-visual="true"] a:hover {
+    color: #fff8e8;
+  }
+
+  .site-header[data-over-visual="true"] nav > a > span:first-child {
+    background: rgba(255, 248, 232, 0.2);
+    color: #fff8e8;
+    box-shadow: 0 0 0 1px rgba(255, 248, 232, 0.2);
+  }
+
+  .site-header[data-over-visual="true"] li a:hover {
+    background: rgba(255, 248, 232, 0.14);
+  }
+</style>
