@@ -14,7 +14,7 @@ const links = [
 <header
   class="site-header sticky top-0 z-50 border-b backdrop-blur-md"
   data-site-header
-  data-over-visual="false"
+  data-over-visual="true"
 >
   <nav
     class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4"
@@ -63,7 +63,7 @@ const links = [
 
       function updateHeaderTone() {
         var probeY = header.offsetHeight + 2;
-        var overVisual = visualSections.some(function (section) {
+        var overVisual = window.scrollY <= 4 || visualSections.some(function (section) {
           var rect = section.getBoundingClientRect();
           return rect.top <= probeY && rect.bottom >= probeY;
         });
