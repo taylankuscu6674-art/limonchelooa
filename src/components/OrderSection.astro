@@ -26,10 +26,16 @@ const { t } = Astro.props;
 
     <form
       id="limoncello-order-form"
-      class="mt-10 space-y-5 rounded-3xl border border-gold-light/30 bg-white p-6 shadow-soft md:p-8"
+      class="relative mt-10 space-y-5 rounded-3xl border border-gold-light/30 bg-white p-6 shadow-soft md:p-8"
       method="post"
       action="#"
+      accept-charset="UTF-8"
       data-alert={t.order.alert}
+      data-security-key="kas-limoncello-order-form"
+      data-security-min-delay-ms="1800"
+      data-security-cooldown-ms="18000"
+      data-security-too-fast={t.order.security.tooFast}
+      data-security-cooldown={t.order.security.cooldown}
       data-message-title={t.order.whatsapp.title}
       data-label-name={t.order.whatsapp.name}
       data-label-email={t.order.whatsapp.email}
@@ -38,6 +44,21 @@ const { t } = Astro.props;
       data-label-size={t.order.whatsapp.size}
       data-label-customization={t.order.whatsapp.customization}
     >
+      <div
+        class="pointer-events-none absolute -left-[100vw] top-auto h-px w-px overflow-hidden opacity-0"
+        aria-hidden="true"
+      >
+        <label for="order-company">{t.order.security.honeypot}</label>
+        <input
+          id="order-company"
+          name="company"
+          type="text"
+          tabindex="-1"
+          autocomplete="off"
+          data-security-honeypot
+        />
+      </div>
+      <p class="sr-only" aria-live="polite" data-security-status></p>
       <div>
         <label for="order-name" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-soft"
           >{t.order.labels.name}</label
@@ -48,6 +69,7 @@ const { t } = Astro.props;
           type="text"
           required
           autocomplete="name"
+          maxlength="80"
           class="w-full rounded-xl border border-gold-light/40 bg-cream/30 px-4 py-3 text-sm text-ink transition-colors placeholder:text-stone-soft/60 focus:border-gold focus:bg-white focus:outline-none"
           placeholder={t.order.placeholders.name}
         />
@@ -62,6 +84,7 @@ const { t } = Astro.props;
             name="email"
             type="email"
             autocomplete="email"
+            maxlength="120"
             class="w-full rounded-xl border border-gold-light/40 bg-cream/30 px-4 py-3 text-sm text-ink transition-colors placeholder:text-stone-soft/60 focus:border-gold focus:bg-white focus:outline-none"
             placeholder={t.order.placeholders.email}
           />
@@ -75,6 +98,8 @@ const { t } = Astro.props;
             name="phone"
             type="tel"
             autocomplete="tel"
+            inputmode="tel"
+            maxlength="32"
             class="w-full rounded-xl border border-gold-light/40 bg-cream/30 px-4 py-3 text-sm text-ink transition-colors placeholder:text-stone-soft/60 focus:border-gold focus:bg-white focus:outline-none"
             placeholder={t.order.placeholders.phone}
           />
@@ -92,6 +117,7 @@ const { t } = Astro.props;
           name="address"
           required
           rows={3}
+          maxlength="420"
           class="w-full resize-y rounded-xl border border-gold-light/40 bg-cream/30 px-4 py-3 text-sm text-ink transition-colors placeholder:text-stone-soft/60 focus:border-gold focus:bg-white focus:outline-none"
           placeholder={t.order.placeholders.address}
         ></textarea>
@@ -122,6 +148,7 @@ const { t } = Astro.props;
           id="order-notes"
           name="notes"
           rows={3}
+          maxlength="300"
           class="w-full resize-y rounded-xl border border-gold-light/40 bg-cream/30 px-4 py-3 text-sm text-ink transition-colors placeholder:text-stone-soft/60 focus:border-gold focus:bg-white focus:outline-none"
           placeholder={t.order.placeholders.notes}
         ></textarea>
@@ -136,33 +163,51 @@ const { t } = Astro.props;
   </div>
 </section>
 
-<script is:inline>
-  (function () {
-    var form = document.getElementById("limoncello-order-form");
-    if (!form) return;
+<script>
+  import {
+    guardSecureSubmission,
+    openSecureExternalUrl,
+    prepareSecureForm,
+    sanitizeForMessage,
+    showGuardMessage,
+  } from "../scripts/order-security";
+
+  const form = document.getElementById("limoncello-order-form") as HTMLFormElement | null;
+  if (form) {
+    prepareSecureForm(form);
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      var email = document.getElementById("order-email");
-      var phone = document.getElementById("order-phone");
-      var hasEmail = email && email.value.trim();
-      var hasPhone = phone && phone.value.trim();
+      var email = document.getElementById("order-email") as HTMLInputElement | null;
+      var phone = document.getElementById("order-phone") as HTMLInputElement | null;
+      var hasEmail = email && sanitizeForMessage(email.value, 120);
+      var hasPhone = phone && sanitizeForMessage(phone.value, 32);
       if (!hasEmail && !hasPhone) {
         alert(form.dataset.alert || "Please enter an email or phone number so we can confirm your order.");
         return;
       }
-      var name = document.getElementById("order-name");
-      var address = document.getElementById("order-address");
-      var size = document.getElementById("order-size");
-      var notes = document.getElementById("order-notes");
+
+      const guard = guardSecureSubmission(form);
+      if (!guard.ok) {
+        if (guard.message) {
+          showGuardMessage(form, guard.message);
+        }
+        return;
+      }
+
+      var name = document.getElementById("order-name") as HTMLInputElement | null;
+      var address = document.getElementById("order-address") as HTMLTextAreaElement | null;
+      var size = document.getElementById("order-size") as HTMLSelectElement | null;
+      var notes = document.getElementById("order-notes") as HTMLTextAreaElement | null;
 
       var messageLines = [
         form.dataset.messageTitle || "New limoncello order request",
-        (form.dataset.labelName || "Name") + ": " + (name && name.value ? name.value.trim() : "-"),
-        (form.dataset.labelEmail || "Email") + ": " + (email && email.value ? email.value.trim() : "-"),
-        (form.dataset.labelPhone || "Phone") + ": " + (phone && phone.value ? phone.value.trim() : "-"),
-        (form.dataset.labelAddress || "Address") + ": " + (address && address.value ? address.value.trim() : "-"),
+        (form.dataset.labelName || "Name") + ": " + (name && name.value ? sanitizeForMessage(name.value, 80) : "-"),
+        (form.dataset.labelEmail || "Email") + ": " + (email && email.value ? sanitizeForMessage(email.value, 120) : "-"),
+        (form.dataset.labelPhone || "Phone") + ": " + (phone && phone.value ? sanitizeForMessage(phone.value, 32) : "-"),
+        (form.dataset.labelAddress || "Address") + ": " + (address && address.value ? sanitizeForMessage(address.value, 420) : "-"),
         (form.dataset.labelSize || "Bottle size") + ": " + (size && size.value ? size.value : "-"),
-        (form.dataset.labelCustomization || "Customization") + ": " + (notes && notes.value ? notes.value.trim() : "-"),
+        (form.dataset.labelCustomization || "Customization") + ": " + (notes && notes.value ? sanitizeForMessage(notes.value, 300) : "-"),
       ];
 
       var waNumber = "905313186674";
@@ -172,20 +217,9 @@ const { t } = Astro.props;
         "?text=" +
         encodeURIComponent(messageLines.join("\n"));
 
-      var win = window.open(waUrl, "_blank", "noopener,noreferrer");
-      if (win) {
-        win.opener = null;
-      } else {
-        var link = document.createElement("a");
-        link.href = waUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }
+      openSecureExternalUrl(waUrl);
 
       form.reset();
     });
-  })();
+  }
 </script>

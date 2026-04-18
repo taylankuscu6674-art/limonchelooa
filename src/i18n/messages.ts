@@ -131,6 +131,11 @@ export type Messages = {
     contactRequirement: string;
     button: string;
     alert: string;
+    security: {
+      honeypot: string;
+      tooFast: string;
+      cooldown: string;
+    };
     whatsapp: {
       title: string;
       name: string;
@@ -341,6 +346,11 @@ export const messages: Record<Locale, Messages> = {
       contactRequirement: "Sana ulaşabilmemiz için e-posta veya telefondan en az birini yaz.",
       button: "Sipariş Ver",
       alert: "Siparişini teyit edebilmemiz için lütfen e-posta veya telefon gir.",
+      security: {
+        honeypot: "Şirket",
+        tooFast: "Güvenliğin için lütfen birkaç saniye bekleyip tekrar dene.",
+        cooldown: "Siparişin hazırlanıyor. Lütfen kısa bir süre sonra tekrar dene.",
+      },
       whatsapp: {
         title: "Yeni limoncello sipariş isteği",
         name: "Ad Soyad",
@@ -550,6 +560,11 @@ export const messages: Record<Locale, Messages> = {
       contactRequirement: "Provide at least one: email or phone, so we can reach you.",
       button: "Place Order",
       alert: "Please enter an email or phone number so we can confirm your order.",
+      security: {
+        honeypot: "Company",
+        tooFast: "For security, please wait a few seconds before sending your request.",
+        cooldown: "Your request is being prepared. Please try again shortly.",
+      },
       whatsapp: {
         title: "New limoncello order request",
         name: "Name",
@@ -759,6 +774,11 @@ export const messages: Record<Locale, Messages> = {
       contactRequirement: "Укажите email или телефон, чтобы мы могли связаться с вами.",
       button: "Отправить заказ",
       alert: "Пожалуйста, укажите email или телефон, чтобы мы могли подтвердить заказ.",
+      security: {
+        honeypot: "Компания",
+        tooFast: "Для безопасности подождите несколько секунд и повторите отправку.",
+        cooldown: "Ваш запрос уже готовится. Попробуйте еще раз через немного.",
+      },
       whatsapp: {
         title: "Новый заказ лимончелло",
         name: "Имя",

@@ -29,3 +29,10 @@ npm run dev
 npm run check
 npm run build
 ```
+
+## Security
+
+- Silent honeypot and submit-timing checks protect the WhatsApp order flows from basic bots.
+- Short session cooldowns reduce repeat automated submissions.
+- Production pages include a restrictive Content Security Policy, referrer policy, and limited browser permissions.
+- Security contact metadata is available at `/.well-known/security.txt`.

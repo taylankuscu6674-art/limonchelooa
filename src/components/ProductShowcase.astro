@@ -48,14 +48,36 @@ const sizes = ["250ml", "500ml", "700ml"];
         </p>
         <form
           id="product-quick-order-form"
-          class="mt-6"
+          class="relative mt-6"
           action="#"
+          method="post"
+          accept-charset="UTF-8"
+          data-security-key="kas-limoncello-quick-order-form"
+          data-security-min-delay-ms="1200"
+          data-security-cooldown-ms="12000"
+          data-security-too-fast={t.order.security.tooFast}
+          data-security-cooldown={t.order.security.cooldown}
           data-message-title={t.showcase.quickOrderMessage.title}
           data-message-product-label={t.showcase.quickOrderMessage.product}
           data-message-size-label={t.showcase.quickOrderMessage.size}
           data-message-customization={t.showcase.quickOrderMessage.customization}
           data-product-name={t.showcase.productName}
         >
+          <div
+            class="pointer-events-none absolute -left-[100vw] top-auto h-px w-px overflow-hidden opacity-0"
+            aria-hidden="true"
+          >
+            <label for="quick-order-company">{t.order.security.honeypot}</label>
+            <input
+              id="quick-order-company"
+              name="company"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+              data-security-honeypot
+            />
+          </div>
+          <p class="sr-only" aria-live="polite" data-security-status></p>
           <fieldset>
             <legend class="sr-only">{t.showcase.sizeLegend}</legend>
             <div class="flex flex-wrap gap-2">
@@ -89,14 +111,29 @@ const sizes = ["250ml", "500ml", "700ml"];
   </div>
 </section>
 
-<script is:inline>
-  (function () {
-    var form = document.getElementById("product-quick-order-form");
-    if (!form) return;
+<script>
+  import {
+    guardSecureSubmission,
+    openSecureExternalUrl,
+    prepareSecureForm,
+    showGuardMessage,
+  } from "../scripts/order-security";
+
+  const form = document.getElementById("product-quick-order-form") as HTMLFormElement | null;
+  if (form) {
+    prepareSecureForm(form);
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      var selected = form.querySelector('input[name="quick-size"]:checked');
+      const guard = guardSecureSubmission(form);
+      if (!guard.ok) {
+        if (guard.message) {
+          showGuardMessage(form, guard.message);
+        }
+        return;
+      }
+
+      var selected = form.querySelector<HTMLInputElement>('input[name="quick-size"]:checked');
       var size = selected && selected.value ? selected.value : "500ml";
       var messageLines = [
         form.dataset.messageTitle || "New direct limoncello order request",
@@ -112,18 +149,7 @@ const sizes = ["250ml", "500ml", "700ml"];
         "?text=" +
         encodeURIComponent(messageLines.join("\n"));
 
-      var win = window.open(waUrl, "_blank", "noopener,noreferrer");
-      if (win) {
-        win.opener = null;
-      } else {
-        var link = document.createElement("a");
-        link.href = waUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }
+      openSecureExternalUrl(waUrl);
     });
-  })();
+  }
 </script>

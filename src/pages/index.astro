@@ -6,6 +6,17 @@ const fallbackUrl = getLocalizedPath(defaultLocale);
 const basePath = getBasePath();
 const fallbackTitle = messages[defaultLocale].metadata.title;
 const fallbackDescription = messages[defaultLocale].metadata.description;
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "connect-src 'self'",
+  "frame-src 'none'",
+  "form-action 'self'",
+].join("; ");
 ---
 
 <!doctype html>
@@ -13,6 +24,9 @@ const fallbackDescription = messages[defaultLocale].metadata.description;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={contentSecurityPolicy} />}
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()" />
     <meta name="robots" content="noindex, follow" />
     <meta name="description" content={fallbackDescription} />
     <meta http-equiv="refresh" content={`0;url=${fallbackUrl}`} />
