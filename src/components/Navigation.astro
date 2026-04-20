@@ -28,7 +28,7 @@ const links = [
   data-over-visual="true"
 >
   <nav
-    class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:gap-4 md:px-6 md:py-4"
+    class="mx-auto grid max-w-6xl grid-cols-[auto,minmax(0,1fr),auto] items-center gap-2 px-4 py-3 sm:gap-3 md:flex md:justify-between md:gap-4 md:px-6 md:py-4"
     aria-label={t.nav.aria}
   >
     <a
@@ -40,22 +40,25 @@ const links = [
         aria-hidden="true">🍋</span>
       <span class="hidden sm:inline">{t.brand.name}</span>
     </a>
-    <ul
-      class="-mr-2 flex max-w-[min(100vw-12rem,26rem)] flex-nowrap items-center justify-end gap-0.5 overflow-x-auto pb-1 text-xs font-medium text-ink/85 md:max-w-none md:flex-wrap md:gap-2 md:overflow-visible md:pb-0 md:text-sm"
-    >
-      {
-        links.map(({ href, label }) => (
-          <li>
-            <a
-              href={href}
-              class="rounded-full px-2.5 py-1.5 transition-colors hover:bg-lemon-300/50 hover:text-ink md:px-3"
-            >
-              {label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    <div class="site-header__menu-wrap min-w-0 overflow-hidden md:overflow-visible">
+      <ul
+        class="site-header__menu flex min-w-0 snap-x flex-nowrap items-center justify-start gap-1 overflow-x-auto scroll-smooth px-0.5 pb-1 text-xs font-medium text-ink/85 md:max-w-none md:flex-wrap md:justify-center md:gap-2 md:overflow-visible md:px-0 md:pb-0 md:text-sm"
+        aria-label={t.nav.aria}
+      >
+        {
+          links.map(({ href, label }) => (
+            <li class="shrink-0 snap-start">
+              <a
+                href={href}
+                class="block whitespace-nowrap rounded-full px-2.5 py-1.5 transition-colors hover:bg-lemon-300/50 hover:text-ink md:px-3"
+              >
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
     <LanguageSwitcher locale={locale} t={t} />
   </nav>
 </header>
@@ -162,6 +165,15 @@ const links = [
       color 900ms ease,
       background-color 300ms ease,
       border-color 900ms ease;
+  }
+
+  .site-header__menu {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .site-header__menu::-webkit-scrollbar {
+    display: none;
   }
 
   .site-header[data-over-visual="true"] a:hover {
